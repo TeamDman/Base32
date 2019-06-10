@@ -31,22 +31,22 @@ function encodeRaw(buffer) {
         char = (a & 0b11111000) >> 3;
         result += buffer[index] !== undefined ? base32Chars[char] : '\x00';
 
-        char = ((a & 0b00000111) << 2) | ((b & 0b11000000)>>6);
+        char = ((a & 0b00000111) << 2) | ((b & 0b11000000) >> 6);
         result += buffer[index] !== undefined ? base32Chars[char] : '\x00';
 
         char = (b & 0b00111110) >> 1;
         result += buffer[index + 1] !== undefined ? base32Chars[char] : '\x00';
 
-        char = ((b & 0b0000001) << 4) | ((c & 0b11110000)>>4);
+        char = ((b & 0b0000001) << 4) | ((c & 0b11110000) >> 4);
         result += buffer[index + 1] !== undefined ? base32Chars[char] : '\x00';
 
-        char = ((c & 0b00001111) << 1) | ((d & 0b10000000)>>7);
+        char = ((c & 0b00001111) << 1) | ((d & 0b10000000) >> 7);
         result += buffer[index + 2] !== undefined ? base32Chars[char] : '\x00';
 
         char = (d & 0b01111100) >> 2;
         result += buffer[index + 3] !== undefined ? base32Chars[char] : '\x00';
 
-        char = ((d & 0b00000011) << 3) | ((e & 0b11100000)>>5);
+        char = ((d & 0b00000011) << 3) | ((e & 0b11100000) >> 5);
         result += buffer[index + 3] !== undefined ? base32Chars[char] : '\x00';
 
         char = e & 0b00011111;
@@ -60,15 +60,27 @@ function decode(input) {
 }
 
 function encode2(input) {
-    console.log(
-        ([...input+'\x00\x00\x00\x00\x00']
+    return (
+        [...input + '\x00\x00\x00\x00\x00']
             .map(c => c.charCodeAt())
-            .map(c => ('00000000'+c.toString(2)).slice(-8))
+            .map(c => ('00000000' + c.toString(2)).slice(-8))
             .join('')
-            .replace(/([0|1]{5})/g, (match, cap) =>  base32Chars[parseInt(cap, 2)])
+            .replace(/([0|1]{5})/g, (match, cap) => base32Chars[parseInt(cap, 2)])
             .substr(0, Math.ceil(input.length * 8 / 5))
-            +'=======').slice(0,Math.ceil(Math.ceil(input.length * 8 / 5)/8)*8)
-    );
+        + '======='
+    ).slice(0, Math.ceil(Math.ceil(input.length * 8 / 5) / 8) * 8)
+        ;
+}
+
+function decode2(input) {
+    return [...input]
+        .filter(c => c !== '=')
+        .map(c => base32Chars.indexOf(c))
+        .map(c => ('00000000' + c.toString(2)).slice(-5))
+        .join('')
+        .replace(/([0|1]{8})/g, (match, cap) => String.fromCharCode(parseInt(cap,2)))
+        .substr(0, Math.ceil(input.replace(/=/g,'').length * 5 / 8))
+        ;
 }
 
 module.exports = {
@@ -80,9 +92,15 @@ module.exports = {
 };
 
 // console.log(encode('ABCDE'));
-encode2('A');
-encode2('AB');
-encode2('ABC');
-encode2('ABCD');
-encode2('ABCDE');
+console.log(encode2('A'));
+console.log(decode2(encode2('A')));
+console.log(encode2('AB'));
+console.log(decode2(encode2('AB')));
+console.log(encode2('ABC'));
+console.log(decode2(encode2('ABC')));
+console.log(encode2('ABCD'));
+console.log(decode2(encode2('ABCD')));
+console.log(encode2('ABCDE'));
+console.log(decode2(encode2('ABCDE')));
+
 //http://www.herongyang.com/Encoding/Base32-Encoding-Algorithm.html
