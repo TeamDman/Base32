@@ -59,6 +59,18 @@ function decode(input) {
 
 }
 
+function encode2(input) {
+    console.log(
+        ([...input+'\x00\x00\x00\x00\x00']
+            .map(c => c.charCodeAt())
+            .map(c => ('00000000'+c.toString(2)).slice(-8))
+            .join('')
+            .replace(/([0|1]{5})/g, (match, cap) =>  base32Chars[parseInt(cap, 2)])
+            .substr(0, Math.ceil(input.length * 8 / 5))
+            +'=======').slice(0,Math.ceil(Math.ceil(input.length * 8 / 5)/8)*8)
+    );
+}
+
 module.exports = {
     base32Chars,
     base32Lookup,
@@ -67,5 +79,10 @@ module.exports = {
     decode
 };
 
-console.log(encode('ABCDE'));
+// console.log(encode('ABCDE'));
+encode2('A');
+encode2('AB');
+encode2('ABC');
+encode2('ABCD');
+encode2('ABCDE');
 //http://www.herongyang.com/Encoding/Base32-Encoding-Algorithm.html
