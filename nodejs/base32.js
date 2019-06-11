@@ -78,8 +78,9 @@ function decode2(input) {
         .map(c => base32Chars.indexOf(c))
         .map(c => ('00000000' + c.toString(2)).slice(-5))
         .join('')
+        .substr(0,Math.floor(input.replace(/=/g,'').length*5/8)*8)
         .replace(/([0|1]{8})/g, (match, cap) => String.fromCharCode(parseInt(cap,2)))
-        .substr(0, Math.ceil(input.replace(/=/g,'').length * 5 / 8))
+        // .substr(0, Math.ceil(input.replace(/=/g,'').length * 5 / 8))
         ;
 }
 
@@ -92,15 +93,8 @@ module.exports = {
 };
 
 // console.log(encode('ABCDE'));
-console.log(encode2('A'));
-console.log(decode2(encode2('A')));
-console.log(encode2('AB'));
-console.log(decode2(encode2('AB')));
-console.log(encode2('ABC'));
-console.log(decode2(encode2('ABC')));
-console.log(encode2('ABCD'));
-console.log(decode2(encode2('ABCD')));
-console.log(encode2('ABCDE'));
-console.log(decode2(encode2('ABCDE')));
+['A','AB','ABC','ABCD','ABCDE','aBcD000','aBcD00','AbCd0'].forEach(a => {
+    console.log(`${a}\t${encode2(a)}\t${decode2(encode2(a))}`);
+});
 
 //http://www.herongyang.com/Encoding/Base32-Encoding-Algorithm.html
